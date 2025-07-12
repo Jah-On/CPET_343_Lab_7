@@ -1,0 +1,8 @@
+work
+*.vcd
+*.exe
+*.wlf
+transcript
+project
+output_files
+*block_diagram.draw*
