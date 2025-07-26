@@ -2,6 +2,7 @@ work
 *.vcd
 *.exe
 *.wlf
+*.fst
 transcript
 project
 output_files
