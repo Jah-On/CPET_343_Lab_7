@@ -104,7 +104,7 @@ begin
         port map (
             clk        => clk,
             reset      => not reset,
-            input      => exec,
+            input      => not exec,
             edge       => sync_exec
         );
 
@@ -112,7 +112,7 @@ begin
         port map (
             clk        => clk,
             reset      => not reset,
-            input      => mr,
+            input      => not mr,
             edge       => sync_mr
         );
 
@@ -120,7 +120,7 @@ begin
         port map (
             clk        => clk,
             reset      => not reset,
-            input      => ms,
+            input      => not ms,
             edge       => sync_ms
         );
 
