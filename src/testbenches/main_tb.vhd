@@ -2,10 +2,10 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
-entity main_tb is
-end entity main_tb;
+entity main is
+end entity main;
 
-architecture stim of main_tb is
+architecture stim of main is
     component tlde is
         port (
             reset, clk              : in  std_logic;
@@ -34,9 +34,11 @@ architecture stim of main_tb is
 
     signal done                         : std_logic                    := '0';
 
-    signal reset, clk, exec, mr, ms     : std_logic                    := '0';
+    signal reset                        : std_logic                    := '0';
+    signal clk, exec, mr, ms            : std_logic                    := '1';
     signal op                           : std_logic_vector(1 downto 0) := "00";
     signal number                       : std_logic_vector(7 downto 0) := "00000000";
+    signal state                        : std_logic_vector(2 downto 0) := "000";
     signal hex_out                      : ssd_arr_t;
 
     procedure DelayClocks(Cycles : integer := 1) is
@@ -50,7 +52,7 @@ architecture stim of main_tb is
     begin
         for dsp_index in 2 downto 0 loop
             assert hex_out(dsp_index) = DSP_VALS(Row)(dsp_index) 
-                report "Hex " & integer'image(dsp_index) & " does not match expected value!" 
+                report integer'image(Row) & ": Hex " & integer'image(dsp_index) & " does not match expected value!" 
                     severity error;
         end loop;
     end procedure;
@@ -68,11 +70,10 @@ begin
 
     main: process
     begin
-        DelayClocks(8);
-
+        DelayClocks(10);
         reset  <= '1';
 
-        DelayClocks(4);
+        DelayClocks(10);
 
         CheckDisplay(0);
 
@@ -84,7 +85,7 @@ begin
         DelayClocks(4);
         exec   <= '0';
 
-        DelayClocks(4);
+        DelayClocks(10);
         CheckDisplay(1);
 
         DelayClocks(4);
@@ -96,13 +97,13 @@ begin
         DelayClocks(4);
         exec   <= '0';
 
-        DelayClocks(4);
+        DelayClocks(10);
         CheckDisplay(2);
 
         ms     <= '1';
         DelayClocks(4);
         ms     <= '0';
-        DelayClocks(4);
+        DelayClocks(10);
 
         op     <= "01";
         exec   <= '1';
@@ -110,7 +111,7 @@ begin
         DelayClocks(4);
         exec   <= '0';
 
-        DelayClocks(4);
+        DelayClocks(10);
         CheckDisplay(3);
 
         number <= "00000010";
@@ -120,7 +121,7 @@ begin
         DelayClocks(4);
         exec   <= '0';
 
-        DelayClocks(4);
+        DelayClocks(10);
         CheckDisplay(4);
 
         mr     <= '1';
@@ -128,7 +129,7 @@ begin
         mr     <= '0';
         DelayClocks(4);
 
-        DelayClocks(4);
+        DelayClocks(10);
         CheckDisplay(5);
 
         exec   <= '1';
@@ -136,7 +137,7 @@ begin
         DelayClocks(4);
         exec   <= '0';
 
-        DelayClocks(8);
+        DelayClocks(10);
         CheckDisplay(6);
 
         done   <= '1';
@@ -156,6 +157,6 @@ begin
             hex2      => hex_out(2),
             hex1      => hex_out(1),
             hex0      => hex_out(0),
-            state     => open
+            state     => state
         );
 end architecture stim;

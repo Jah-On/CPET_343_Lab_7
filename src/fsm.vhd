@@ -31,15 +31,23 @@ architecture control_flow of fsm is
 
     signal current_state, next_state : states_t := IDLE;
 begin
-    set_next_state: process(clk, reset)
+    set_next_state: process(clk, reset, exec, ms, mr)
     begin
+        -- MR_ADDRESS_SAVE when mr   = '1' else
+        -- DATA_ALU        when exec = '1' else
+        -- MS_DATA_MEMORY  when ms   = '1'
         if reset = '1' then
             next_state <= IDLE; 
         elsif rising_edge(clk) then
             case current_state is
-                when IDLE            => next_state <=   MR_ADDRESS_SAVE when mr   = '1' else
-                                                        DATA_ALU        when exec = '1' else
-                                                        MS_DATA_MEMORY  when ms   = '1';
+                when IDLE            =>
+                    if    (mr   = '1') then
+                        next_state <= MR_ADDRESS_SAVE;
+                    elsif (exec = '1') then
+                        next_state <= DATA_ALU;
+                    elsif (ms = '1') then
+                        next_state <= MS_DATA_MEMORY;
+                    end if;
 
                 -- MR path
                 when MR_ADDRESS_SAVE => next_state <=   MR_DATA_MEMORY;
@@ -59,10 +67,14 @@ begin
         end if;
     end process set_next_state;
     
-    update_current_state: process(next_state)
+    update_current_state: process(clk, reset)
     begin
-        if current_state /= next_state then
-            current_state <= next_state;
+        if reset = '1' then
+            current_state <= IDLE; 
+        elsif rising_edge(clk) then
+            if current_state /= next_state then
+                current_state <= next_state;
+            end if;
         end if;
     end process update_current_state;
 
