@@ -59,11 +59,15 @@ architecture stim of main is
 begin
     gen_clock: process
     begin
+        report "*** Starting Simulation ***" severity note;
+
         while done /= '1' loop 
             clk <= not clk;
             
             wait for CYCLE_INTERVAL;
         end loop;
+
+        report "*** Finished Simulation ***" severity note;
 
         wait;
     end process gen_clock;
@@ -80,10 +84,10 @@ begin
         DelayClocks(1);
 
         number <= "00000100";
-        exec   <= '1';
+        exec   <= '0';
 
         DelayClocks(4);
-        exec   <= '0';
+        exec   <= '1';
 
         DelayClocks(10);
         CheckDisplay(1);
@@ -92,50 +96,50 @@ begin
 
         number <= "00001000";
         op     <= "10";
-        exec   <= '1';
+        exec   <= '0';
 
         DelayClocks(4);
-        exec   <= '0';
+        exec   <= '1';
 
         DelayClocks(10);
         CheckDisplay(2);
 
-        ms     <= '1';
-        DelayClocks(4);
         ms     <= '0';
+        DelayClocks(4);
+        ms     <= '1';
         DelayClocks(10);
 
         op     <= "01";
-        exec   <= '1';
+        exec   <= '0';
 
         DelayClocks(4);
-        exec   <= '0';
+        exec   <= '1';
 
         DelayClocks(10);
         CheckDisplay(3);
 
         number <= "00000010";
         op     <= "11";
-        exec   <= '1';
+        exec   <= '0';
 
         DelayClocks(4);
-        exec   <= '0';
+        exec   <= '1';
 
         DelayClocks(10);
         CheckDisplay(4);
 
-        mr     <= '1';
-        DelayClocks(4);
         mr     <= '0';
+        DelayClocks(4);
+        mr     <= '1';
         DelayClocks(4);
 
         DelayClocks(10);
         CheckDisplay(5);
 
-        exec   <= '1';
+        exec   <= '0';
 
         DelayClocks(4);
-        exec   <= '0';
+        exec   <= '1';
 
         DelayClocks(10);
         CheckDisplay(6);

@@ -17,7 +17,7 @@ entity fsm is
         alu_in, mem_in : in  std_logic_vector(7 downto 0);
         write_mode     : out std_logic                    := '0';
         addr           : out std_logic_vector(1 downto 0) := "00";
-        data_out       : out std_logic_vector(7 downto 0);
+        data_out       : out std_logic_vector(7 downto 0) := "00000000";
         state_out      : out std_logic_vector(2 downto 0)
     );
 end entity fsm;
@@ -33,9 +33,6 @@ architecture control_flow of fsm is
 begin
     set_next_state: process(clk, reset, exec, ms, mr)
     begin
-        -- MR_ADDRESS_SAVE when mr   = '1' else
-        -- DATA_ALU        when exec = '1' else
-        -- MS_DATA_MEMORY  when ms   = '1'
         if reset = '1' then
             next_state <= IDLE; 
         elsif rising_edge(clk) then
@@ -72,36 +69,51 @@ begin
         if reset = '1' then
             current_state <= IDLE; 
         elsif rising_edge(clk) then
-            if current_state /= next_state then
-                current_state <= next_state;
-            end if;
+            current_state <= next_state;
         end if;
     end process update_current_state;
 
-    update_io: process(current_state)
+    update_state_out: process(current_state)
         variable state_as_int : integer;
     begin
         state_as_int := states_t'pos(current_state);
         state_out    <= std_logic_vector(to_unsigned(state_as_int, state_out'length));
-        case current_state is
-            when IDLE            => 
-                write_mode <= '0';
-                addr       <= "00";
-            when MR_ADDRESS_SAVE => 
-                addr       <= "01";
-            when MR_DATA_MEMORY  => 
-                data_out   <= mem_in;
-            when ADDRESS_WORKING => 
-                addr       <= "00";
-            when DATA_ALU        =>
-                data_out   <= alu_in;
-            when MS_DATA_MEMORY  => 
-                data_out   <= mem_in;
-            when MS_ADDRESS_SAVE =>
-                addr       <= "01";
-            when others          => 
-                write_mode <= '1';
-        end case;
-    end process update_io;
-    
+    end process update_state_out;
+
+    update_write: process(clk)
+    begin
+        if rising_edge(clk) then
+            case current_state is
+                when ENABLE_WRITE => write_mode <= '1';
+                when others       => write_mode <= '0';
+            end case;
+        end if;
+    end process update_write;
+
+    update_address: process(clk)
+    begin
+        if rising_edge(clk) then
+            case current_state is
+                when MR_ADDRESS_SAVE => addr     <= "01";
+                when MR_DATA_MEMORY  => addr     <= "01";
+                when MS_ADDRESS_SAVE => addr     <= "01";
+                when ENABLE_WRITE    => addr     <= addr;
+                when others          => addr     <= "00";
+            end case;
+        end if;
+    end process update_address;
+
+    update_data: process(clk)
+    begin
+        if rising_edge(clk) then
+            case current_state is
+                when MR_DATA_MEMORY  => data_out <= mem_in;
+                when ADDRESS_WORKING => data_out <= mem_in;
+                when MS_DATA_MEMORY  => data_out <= mem_in;
+                when MS_ADDRESS_SAVE => data_out <= mem_in;
+                when ENABLE_WRITE    => data_out <= data_out;
+                when others          => data_out <= alu_in;
+            end case;
+        end if;
+    end process update_data;
 end architecture control_flow;
